@@ -1,10 +1,51 @@
 #include "App.hpp"
+#include <raylib.h>
+#include "config.h"
 
 App::App() {
 
 }
 
-void App::HandleInput() {
+int App::start()
+{
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "SudokuSaki™️ by Deevicpkio");
+    //ToggleBorderlessWindowed();
+    SetTargetFPS(60);
+    
+    mainLoop();
+
+    CloseWindow();
+
+    return 0;
+}
+
+void App::mainLoop()
+{
+    bool quitting = false;
+
+    
+    Color backgroundColor = PURPLE;
+
+    while(!quitting) {
+
+        if (WindowShouldClose()) {
+            quitting = WindowShouldClose();
+            continue;
+        }
+        
+        handleInput();
+
+        update();
+
+        BeginDrawing();
+            ClearBackground(backgroundColor);
+            draw();
+        EndDrawing();
+    }
+
+}
+
+void App::handleInput() {
     int keyPressed = GetKeyPressed();
 
     switch(keyPressed)
@@ -22,7 +63,11 @@ void App::HandleInput() {
     }
 }
 
-void App::Update(float deltaTime) {
+void App::update() {
 
 }
 
+void App::draw()
+{
+
+}

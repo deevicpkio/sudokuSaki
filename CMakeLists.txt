@@ -31,6 +31,7 @@ endif()
 add_executable(${PROJECT_NAME} 
 		src/main.cpp
 		src/App.cpp
+		src/Board.cpp
 				)
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
