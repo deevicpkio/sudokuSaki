@@ -8,9 +8,13 @@ App::App() {
 
 int App::start()
 {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "SudokuSaki™️ by Deevicpkio");
-    //ToggleBorderlessWindowed();
-    SetTargetFPS(60);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "SudokuSaki™️ ");
+    // ToggleBorderlessWindowed();
+    SetTargetFPS(30);
+    
+    board = new Board;
+    //board->generateBoard();
+    board->testValuePicker();
     
     mainLoop();
 
@@ -25,6 +29,7 @@ void App::mainLoop()
 
     
     Color backgroundColor = PURPLE;
+    
 
     while(!quitting) {
 
@@ -32,7 +37,6 @@ void App::mainLoop()
             quitting = WindowShouldClose();
             continue;
         }
-        
         handleInput();
 
         update();
