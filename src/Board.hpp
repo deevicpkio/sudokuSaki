@@ -6,12 +6,13 @@
 #include <random>
 
 #define BOARD_SIZE 9
+#define TOTAL_CELLS BOARD_SIZE*BOARD_SIZE
 
-typedef uint8_t tBoardCellValue;
-typedef uint8_t tCoordItem;
+typedef unsigned short tBoardCellValue;
+typedef unsigned short tCoordItem;
 typedef struct {
-	uint8_t row;
-	uint8_t col;
+	tCoordItem row;
+	tCoordItem col;
 } tBoardCoord;
 typedef struct {
 	float x;
@@ -24,8 +25,8 @@ typedef struct {
 	tBoardCoord cellBoardPos;
 	//tScreenCoord cellScreenPos;
 } tBoardCell;
-typedef tBoardCell tBoardData[BOARD_SIZE][BOARD_SIZE];
-typedef tBoardCellValue tBoardRawData[BOARD_SIZE*BOARD_SIZE];
+typedef std::array<tBoardCell, TOTAL_CELLS> tBoardData;
+typedef std::array<tBoardCellValue, TOTAL_CELLS> tBoardRawData;
 
 
 class Board
@@ -36,6 +37,7 @@ public:
 	void update();
 	void newBoard();
 	void getBoardData(tBoardData* boardData);
+	void getBoardDataRaw(tBoardRawData* boardRawData);
 	void testPrintBoard();
 	void testValuePicker();
 
@@ -48,9 +50,10 @@ private:
 	std::mt19937 randGen;
 
 	void cleanBoard();
-	void generateBoard();
+	bool generateBoard(tBoardCoord pLoc);
+	int getCellIndex(const tBoardCoord loc);
 	bool isEmpty(const tBoardCoord cell);
-	bool isValidInput(const tBoardCellValue value, const tCoordItem row, const tCoordItem col);
+	bool isValidInput(const tBoardCellValue value, const tBoardCoord loc);
 	void initializeRNG();
 	tBoardCellValue getRandomValue();
 

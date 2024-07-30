@@ -1,4 +1,5 @@
 #include "App.hpp"
+#include <spdlog/spdlog.h>
 #include <raylib.h>
 #include "config.h"
 
@@ -13,8 +14,8 @@ int App::start()
     SetTargetFPS(30);
     
     board = new Board;
-    //board->generateBoard();
-    board->testValuePicker();
+    board->newBoard();
+    //board->testValuePicker();
     
     mainLoop();
 

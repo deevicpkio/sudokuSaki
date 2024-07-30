@@ -26,13 +26,18 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
   endif()
 endif()
 
-# Our Project
+# Find SPDlog API library
+find_package(spdlog REQUIRED)
 
+# Our Project
 add_executable(${PROJECT_NAME} 
 		src/main.cpp
 		src/App.cpp
 		src/Board.cpp
+		src/Scene.cpp
 				)
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
 
+# Link SDPLog library (header only)
+target_link_libraries(${PROJECT_NAME} spdlog::spdlog_header_only)

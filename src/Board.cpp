@@ -2,6 +2,7 @@
 #include <iostream>
 #include <math.h>
 #include <algorithm>
+#include <spdlog/spdlog.h>
 
 Board::Board()
 {
@@ -19,82 +20,180 @@ void Board::update()
 
 void Board::cleanBoard()
 {
-    for (int col = 0; col < BOARD_SIZE; col++)
+    spdlog::debug("ENTERED cleanBoard()");
+
+    tCoordItem row = 0;
+    tCoordItem col = 0;
+    for (auto& cell : mBoard)
     {
-        for (int row = 0; row < BOARD_SIZE; row++)
+        if (col >= BOARD_SIZE)
         {
-            mBoard[row][col].value = 0;
-            mBoard[row][col].isFixed = false;
-            mBoard[row][col].pencilMarks.fill(0);
-            mBoard[row][col].cellBoardPos.row = row+1;
-            mBoard[row][col].cellBoardPos.col = col+1;
+            row++;
+            col = 0;
         }
 
+        cell.value = 0;
+        cell.isFixed = false;
+        cell.pencilMarks.fill(0);
+        cell.cellBoardPos.row = row;
+        cell.cellBoardPos.col = col;
+        col++;
     }
 }
 
 void Board::newBoard()
 {
+    spdlog::debug("ENTERED newBoard()");
     cleanBoard();
     // NOTE: RNG always reseeded for each new board
     initializeRNG();
+    
+    tBoardCoord origin = {0, 0};
 
-    generateBoard();
+    if (!generateBoard(origin)) 
+    {
+        std::cout << "Error when generating the puzzle. Wrong seed?";
+        return;
+    }
 
     testPrintBoard();
 }
 
 void Board::getBoardData(tBoardData* boardData)
 {
-    int n = sizeof(mBoard) / sizeof(mBoard[0][0]);
-    std::copy(mBoard, mBoard + n, *boardData);
-}
+    spdlog::debug("ENTERED getBoardData()");
 
-void Board::generateBoard()
-{
-    // NOTE: generate with recurse backtracking
-    for (tCoordItem row = 0; row < BOARD_SIZE; row++)
+    int index = 0;
+    for (const auto& cell : mBoard)
     {
-        for (tCoordItem col = 0; col < BOARD_SIZE; col++)
-        {
-            if (!isEmpty({row,col}))
-            {
-                getRandomValue();
-            }
-        }
+        boardData->at(index).value = cell.value;
+        boardData->at(index).isFixed = cell.isFixed;
+        boardData->at(index).cellBoardPos = cell.cellBoardPos;
+        boardData->at(index).pencilMarks = cell.pencilMarks; 
+        index++;
     }
 }
 
-bool Board::isEmpty(const tBoardCoord cell)
+void Board::getBoardDataRaw(tBoardRawData* boardRawData)
 {
-    return mBoard[cell.row][cell.col].value == 0;
+    spdlog::debug("ENTERED getBoardRaw()");
+
+    int index = 0;
+    for (const auto& cell : mBoard)
+    {
+        boardRawData->at(index) = cell.value;
+        index++;
+    }
 }
 
-bool Board::isValidInput(const tBoardCellValue value, const tCoordItem row, const tCoordItem col)
+/*
+def solve(grid, r=0, c=0):
+    if r == 9:
+        return True
+    elif c == 9:
+        return solve(grid, r+1, 0)
+    elif grid[r][c] != 0:
+        return solve(grid, r, c+1)
+    else:
+        for k in range(1, 10):
+            if is_valid(grid, r, c, k):
+                grid[r][c] = k
+                if solve(grid, r, c+1):
+                    return True
+                grid[r][c] = 0
+        return False
+
+*/
+bool Board::generateBoard(tBoardCoord pLoc)
 {
+    spdlog::debug("generatingBoard->cell({},{})", pLoc.row, pLoc.col);
+
+    tBoardCoord loc = pLoc;
+    int index = 0;
+    // NOTE: generate with recurse backtracking
+    if (loc.row == 9)
+    {
+        return true;
+
+    } else if (loc.col == 9)
+    {
+        return generateBoard({tCoordItem(loc.row+1),0});
+
+    } else if (!isEmpty(loc))
+    {
+        return generateBoard({loc.row,tCoordItem(loc.col+1)});
+
+    } else
+    {
+        for (auto value : valuePicker)
+        {
+            if (isValidInput(value, loc))
+            {
+                index = getCellIndex(loc);
+                spdlog::debug("Generate Board->accessing index: {}", index);
+                mBoard.at(index).value = value;
+                if (generateBoard({loc.row,tCoordItem(loc.col+1)}))
+                {
+                    return true;
+                }
+                mBoard.at(index).value = 0; // backtrack
+            }
+        }
+        return false; // could not generate puzzle?
+    }
+}
+
+int Board::getCellIndex(const tBoardCoord loc)
+{
+    int index = loc.col + (loc.row * BOARD_SIZE);
+    spdlog::debug("getCellIndex({})", index);
+
+    return index;
+}
+
+
+bool Board::isEmpty(const tBoardCoord cell)
+{
+    spdlog::debug("ENTERED isEmpty({},{})", cell.row, cell.col);
+    return mBoard.at(getCellIndex(cell)).value == 0;
+}
+
+bool Board::isValidInput(const tBoardCellValue value, const tBoardCoord loc)
+{
+    spdlog::debug("ENTERED isValidInput({} - ({},{}))", value, loc.row, loc.col);
+
+    int index = 0;
     // NOTE: check row
     for (tCoordItem i=0; i < BOARD_SIZE; i++)
     {
-        if (value == mBoard[row][i].value) return false; 
+        index = getCellIndex({loc.row, i});
+        spdlog::debug("isValidInput->check row {}->accessing index: {}", loc.row, index);
+        if (value == mBoard.at(index).value) return false; 
     }
 
     // NOTE: check column
     for (tCoordItem i=0; i < BOARD_SIZE; i++)
     {
-        if (value == mBoard[i][col].value) return false; 
+        index = getCellIndex({i,loc.col});
+        spdlog::debug("isValidInput->check column {}->accessing index: {}", loc.col, index);
+        if (value == mBoard.at(index).value) return false; 
     }
 
     // NOTE: check 3x3 block
-    tCoordItem rowFrom = std::floor(row/3)*3;
-    tCoordItem rowTo = std::floor(row/3)*3+3;
-    tCoordItem colFrom = std::floor(col/3)*3;
-    tCoordItem colTo = std::floor(col/3)*3+3;
+    tCoordItem rowFrom = std::floor(loc.row/3)*3;
+    tCoordItem rowTo = std::floor(loc.row/3)*3+3;
+    tCoordItem colFrom = std::floor(loc.col/3)*3;
+    tCoordItem colTo = std::floor(loc.col/3)*3+3;
+
+    spdlog::debug("Checking box-> From:({},{}) To:({},{})", rowFrom, colFrom, rowTo, colTo);
     
     for (tCoordItem i=rowFrom; i < rowTo; i++)
     {
         for (tCoordItem j=colFrom; j < colTo; j++)
         {
-            if (value == mBoard[i][j].value) return false; 
+            index = (i * BOARD_SIZE) + j;
+            spdlog::debug("isValidInput->check 3x3 box->accessing index: {}", index);
+            if (value == mBoard.at(index).value) return false; 
         }
     }
 
@@ -103,6 +202,8 @@ bool Board::isValidInput(const tBoardCellValue value, const tCoordItem row, cons
 
 void Board::initializeRNG()
 {
+    spdlog::debug("ENTERED initializeRNG()");
+
     std::random_device os_seed;
     rngSeed = os_seed(); // Generate Seed
     std::mt19937 rng(rngSeed);
@@ -127,24 +228,24 @@ tBoardCellValue Board::getRandomValue()
 
 void Board::testPrintBoard()
 {
-    for (tCoordItem row = 0; row < BOARD_SIZE; row++)
+    spdlog::debug("ENTERED testPrintBoard()");
+
+    int index = 0;
+    std::cout << "=======================================================\n|  "; // end of row
+    for (const auto& cell : mBoard) 
     {
-        std::cout << "=========================\n"; // end of row
-        for (tCoordItem  col = 0; col < BOARD_SIZE; col++)
+        std::cout << cell.value << "  |  ";
+        if (cell.cellBoardPos.col == 8) 
         {
-            std::string fixed = mBoard[row][col].isFixed ? "*" : "";
-            std::cout << fixed << mBoard[row][col].value << fixed;
-            std::cout << "(";
-            for (auto mark : mBoard[row][col].pencilMarks )
+            std::cout << "\n";
+            if (cell.cellBoardPos.row < 8)
             {
-                std::cout << mark; 
+                std::cout << "|  ";
             }
-            std::cout << ")"; 
-            std::cout << "-(row:" << mBoard[row][col].cellBoardPos.row;
-            std::cout << "/col:" << mBoard[row][col].cellBoardPos.col << ")\n";
         }
+    
     }
-    std::cout << "=========================\n"; // end of row
+    std::cout << "=======================================================\n"; // end of row
 }
 
 void Board::testValuePicker()
