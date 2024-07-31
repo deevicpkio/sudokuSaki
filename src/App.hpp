@@ -1,6 +1,7 @@
 #pragma once
 #include <raylib.h>
 #include "Board.hpp"
+#include "Scene.hpp"
 
 class App {
 public:
@@ -12,5 +13,6 @@ private:
 	void update();
 	void draw();
 
-	Board* board;
+	Board* mBoard;
+	Scene* mScene;
 };

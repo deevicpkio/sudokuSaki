@@ -10,13 +10,15 @@ App::App() {
 int App::start()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "SudokuSaki™️ ");
-    // ToggleBorderlessWindowed();
+    ToggleBorderlessWindowed();
     SetTargetFPS(30);
     
-    board = new Board;
-    board->newBoard();
-    //board->testValuePicker();
+    mBoard = new Board;
+    mBoard->newBoard();
     
+    mScene = new Scene(SCREEN_WIDTH, SCREEN_HEIGHT);
+    mScene->init(mBoard);
+
     mainLoop();
 
     CloseWindow();
@@ -29,7 +31,7 @@ void App::mainLoop()
     bool quitting = false;
 
     
-    Color backgroundColor = PURPLE;
+    Color backgroundColor = GOLD;
     
 
     while(!quitting) {
@@ -74,5 +76,5 @@ void App::update() {
 
 void App::draw()
 {
-
+    mScene->draw();
 }

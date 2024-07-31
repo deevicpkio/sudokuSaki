@@ -38,6 +38,9 @@ public:
 	void newBoard();
 	void getBoardData(tBoardData* boardData);
 	void getBoardDataRaw(tBoardRawData* boardRawData);
+	bool setCellPencilMark(tBoardCellValue pValue, tBoardCoord pLoc);
+	bool setCellValue(tBoardCellValue pValue, tBoardCoord pLoc);
+
 	void testPrintBoard();
 	void testValuePicker();
 

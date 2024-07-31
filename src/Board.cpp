@@ -243,7 +243,6 @@ void Board::testPrintBoard()
                 std::cout << "|  ";
             }
         }
-    
     }
     std::cout << "=======================================================\n"; // end of row
 }
@@ -266,4 +265,25 @@ void Board::testValuePicker()
     }
     std::cout << "]\n";
 
+}
+
+// TODO: implement this
+bool Board::setCellPencilMark(tBoardCellValue pValue, tBoardCoord pLoc)
+{
+    if (!isEmpty(pLoc)) return false;
+
+    int index = getCellIndex(pLoc);
+
+    return true;
+
+}
+
+// TODO: implement this
+bool Board::setCellValue(tBoardCellValue pValue, tBoardCoord pLoc)
+{
+    if (!isEmpty(pLoc)) return false;
+
+    int index = getCellIndex(pLoc);
+
+    return true;
 }
