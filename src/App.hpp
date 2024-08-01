@@ -1,3 +1,5 @@
+#ifndef SUDOKU_APP
+#define SUDOKU_APP
 #pragma once
 #include <raylib.h>
 #include "Board.hpp"
@@ -16,3 +18,4 @@ private:
 	Board* mBoard;
 	Scene* mScene;
 };
+#endif

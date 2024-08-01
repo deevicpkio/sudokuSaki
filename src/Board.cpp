@@ -146,7 +146,7 @@ bool Board::generateBoard(tBoardCoord pLoc)
 int Board::getCellIndex(const tBoardCoord loc)
 {
     int index = loc.col + (loc.row * BOARD_SIZE);
-    spdlog::debug("getCellIndex({})", index);
+    //spdlog::debug("getCellIndex({})", index);
 
     return index;
 }
@@ -265,6 +265,11 @@ void Board::testValuePicker()
     }
     std::cout << "]\n";
 
+}
+
+tBoardCell Board::getCellData(tBoardCoord pLoc)
+{
+    return mBoard.at(getCellIndex(pLoc));
 }
 
 // TODO: implement this

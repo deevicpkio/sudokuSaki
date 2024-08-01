@@ -36,8 +36,8 @@ public:
 	~Board();
 	void update();
 	void newBoard();
-	void getBoardData(tBoardData* boardData);
-	void getBoardDataRaw(tBoardRawData* boardRawData);
+	int getCellIndex(const tBoardCoord loc);
+	tBoardCell getCellData(tBoardCoord pLoc);
 	bool setCellPencilMark(tBoardCellValue pValue, tBoardCoord pLoc);
 	bool setCellValue(tBoardCellValue pValue, tBoardCoord pLoc);
 
@@ -54,11 +54,12 @@ private:
 
 	void cleanBoard();
 	bool generateBoard(tBoardCoord pLoc);
-	int getCellIndex(const tBoardCoord loc);
 	bool isEmpty(const tBoardCoord cell);
 	bool isValidInput(const tBoardCellValue value, const tBoardCoord loc);
 	void initializeRNG();
 	tBoardCellValue getRandomValue();
+	void getBoardData(tBoardData* boardData);
+	void getBoardDataRaw(tBoardRawData* boardRawData);
 
 };
 #endif

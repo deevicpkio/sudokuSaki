@@ -4,6 +4,36 @@
 #include <raylib.h>
 #include "Board.hpp"
 
+typedef struct 
+{
+    Color boardBorderColor;
+    Color boardBackgroundColor;
+    float boardBorderThickness;
+
+    float boardMarginV;
+    float boardMarginH;
+    float boardWidth;
+    float boardHeight;
+    float cellMarginV;
+    float cellMarginH;
+
+    Color cellBorderColorDefault;
+    Color cellBorderColorSelected;
+    Color cellBorderColor;
+    Color cellBackgroundColorDefault;
+    Color cellBackgroundColorFixed;
+    Color cellBackgroundColorSelected;
+    Color cellBackgroundColor;
+
+    float cellBorderThickness;
+    float cellWidth;
+    float cellHeight;
+
+    Color textColor;
+    float textAlignHCenter; 
+    float textAlignVCenter; 
+} tSceneTheme;
+
 class Scene
 {
 public:
@@ -18,6 +48,7 @@ private:
 	int screenHeight;
 	Board* mBoard;
     Font regularFont;
+	tSceneTheme mTheme;
 };
 
 #endif
