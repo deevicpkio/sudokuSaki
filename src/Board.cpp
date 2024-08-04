@@ -1,4 +1,5 @@
 #include "Board.hpp"
+#include "config.h"
 #include <iostream>
 #include <math.h>
 #include <algorithm>
@@ -9,11 +10,6 @@ Board::Board()
 }
 
 Board::~Board()
-{
-
-}
-
-void Board::update()
 {
 
 }
@@ -33,8 +29,9 @@ void Board::cleanBoard()
         }
 
         cell.value = 0;
-        cell.isFixed = false;
-        cell.pencilMarks.fill(0);
+        cell.solutionValue = 0;
+        cell.isWrong = false;
+        cell.isFixed = true;
         cell.cellBoardPos.row = row;
         cell.cellBoardPos.col = col;
         col++;
@@ -52,11 +49,15 @@ void Board::newBoard()
 
     if (!generateBoard(origin)) 
     {
-        std::cout << "Error when generating the puzzle. Wrong seed?";
+        std::cout << "Error generating the puzzle. Wrong seed?";
         return;
     }
+    
+    generatePuzzle();
 
-    testPrintBoard();
+    SHOW_VAR_INFO(rngSeed);
+
+    //testPrintBoard();
 }
 
 void Board::getBoardData(tBoardData* boardData)
@@ -69,7 +70,6 @@ void Board::getBoardData(tBoardData* boardData)
         boardData->at(index).value = cell.value;
         boardData->at(index).isFixed = cell.isFixed;
         boardData->at(index).cellBoardPos = cell.cellBoardPos;
-        boardData->at(index).pencilMarks = cell.pencilMarks; 
         index++;
     }
 }
@@ -86,24 +86,6 @@ void Board::getBoardDataRaw(tBoardRawData* boardRawData)
     }
 }
 
-/*
-def solve(grid, r=0, c=0):
-    if r == 9:
-        return True
-    elif c == 9:
-        return solve(grid, r+1, 0)
-    elif grid[r][c] != 0:
-        return solve(grid, r, c+1)
-    else:
-        for k in range(1, 10):
-            if is_valid(grid, r, c, k):
-                grid[r][c] = k
-                if solve(grid, r, c+1):
-                    return True
-                grid[r][c] = 0
-        return False
-
-*/
 bool Board::generateBoard(tBoardCoord pLoc)
 {
     spdlog::debug("generatingBoard->cell({},{})", pLoc.row, pLoc.col);
@@ -132,21 +114,40 @@ bool Board::generateBoard(tBoardCoord pLoc)
                 index = getCellIndex(loc);
                 spdlog::debug("Generate Board->accessing index: {}", index);
                 mBoard.at(index).value = value;
+                mBoard.at(index).solutionValue = value;
                 if (generateBoard({loc.row,tCoordItem(loc.col+1)}))
                 {
                     return true;
                 }
-                mBoard.at(index).value = 0; // backtrack
+                mBoard.at(index).value = 0;         // backtrack
+                mBoard.at(index).solutionValue = 0; // backtrack
             }
         }
         return false; // could not generate puzzle?
     }
 }
 
+void Board::generatePuzzle()
+{
+    tBoardCellValue pick;
+    for (auto& cell : mBoard)
+    {
+        cell.isFixed = true;
+        
+        pick = getRandomValue();
+        if (pick < 6)
+        {
+            cell.value = 0;
+            cell.isFixed = false;
+        } else
+        {
+        }
+    }
+}
+
 int Board::getCellIndex(const tBoardCoord loc)
 {
     int index = loc.col + (loc.row * BOARD_SIZE);
-    //spdlog::debug("getCellIndex({})", index);
 
     return index;
 }
@@ -206,7 +207,9 @@ void Board::initializeRNG()
 
     std::random_device os_seed;
     rngSeed = os_seed(); // Generate Seed
+    
     std::mt19937 rng(rngSeed);
+    SHOW_VAR(rngSeed);
 
     randGen = rng;
     std::uniform_int_distribution<tBoardCellValue> distribute(1, BOARD_SIZE);
@@ -273,22 +276,15 @@ tBoardCell Board::getCellData(tBoardCoord pLoc)
 }
 
 // TODO: implement this
-bool Board::setCellPencilMark(tBoardCellValue pValue, tBoardCoord pLoc)
-{
-    if (!isEmpty(pLoc)) return false;
-
-    int index = getCellIndex(pLoc);
-
-    return true;
-
-}
-
-// TODO: implement this
 bool Board::setCellValue(tBoardCellValue pValue, tBoardCoord pLoc)
 {
-    if (!isEmpty(pLoc)) return false;
-
     int index = getCellIndex(pLoc);
+    
+    if (mBoard.at(index).isFixed) return false;
+
+    if (mBoard.at(index).solutionValue != pValue) mBoard.at(index).isWrong = true;
+
+    mBoard.at(index).value = pValue;
 
     return true;
 }

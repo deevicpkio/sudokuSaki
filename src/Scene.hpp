@@ -14,6 +14,12 @@ typedef struct
     float boardMarginH;
     float boardWidth;
     float boardHeight;
+
+    Rectangle boardRect;
+    Rectangle selValueRect;
+    Vector2 selValuePos;
+    Vector2 selValueLabelPos;
+
     float cellMarginV;
     float cellMarginH;
 
@@ -29,26 +35,56 @@ typedef struct
     float cellWidth;
     float cellHeight;
 
-    Color textColor;
+    Color textColor; // base text color
+    Color userInputColor; // user input text color
+    int fontSize; // base font size
+    float pencilMarkFontSize; // (0.1 .. n) proportional to base size (ie.: .90 means 90% of fontSize)
+    float userInputFontSize;
+    float menuButtonFontSize;
+
     float textAlignHCenter; 
     float textAlignVCenter; 
 } tSceneTheme;
 
+typedef struct
+{
+    tBoardCoord loc;
+    std::array<tBoardCellValue, BOARD_SIZE-1> pencilMarks;
+    bool isFixed;
+    bool isSelected;
+    bool isMarked;
+    Rectangle cellRect;
+    Vector2 valuePos;
+    Rectangle pencilMarksRect;
+} tScreenCell;
+typedef std::array<tScreenCell, TOTAL_CELLS> tScreenBoard;
+
 class Scene
 {
 public:
-	Scene(int pScreenWidth, int pScreenHeight);
-	~Scene();
-	void init(Board* pBoardRef);
-	void draw();
-	void update(const tBoardData pBoardData);
+    Scene(int pScreenWidth, int pScreenHeight);
+    ~Scene();
+    void init(Board* pBoardRef);
+    void draw();
+    void update();
+    void setSelectedValue(const tBoardCellValue pValue);
+    inline tBoardCellValue getSelectedValue() { return selectedValue; }
 
 private:
-	int screenWidth;
-	int screenHeight;
-	Board* mBoard;
-    Font regularFont;
-	tSceneTheme mTheme;
+    int screenWidth;
+    int screenHeight;
+    Board* mBoard;
+    Font baseFont;
+    tSceneTheme mTheme;
+    tScreenBoard mBoardUI;
+    tBoardCellValue selectedValue;
+	Vector2 mousePos;
+
+    void layoutSetup();
+    void drawBoard();
+    void drawUI();
+    void drawCells();
+    void drawBoxHighlight();
 };
 
 #endif

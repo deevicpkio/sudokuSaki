@@ -15,29 +15,26 @@ typedef struct {
 	tCoordItem col;
 } tBoardCoord;
 typedef struct {
-	float x;
-	float y;
-} tScreenCoord;
-typedef struct {
 	tBoardCellValue value;
+	tBoardCellValue solutionValue;
 	bool isFixed;
-	std::array<tBoardCellValue, BOARD_SIZE-1> pencilMarks;
+	bool isWrong;
 	tBoardCoord cellBoardPos;
-	//tScreenCoord cellScreenPos;
 } tBoardCell;
 typedef std::array<tBoardCell, TOTAL_CELLS> tBoardData;
 typedef std::array<tBoardCellValue, TOTAL_CELLS> tBoardRawData;
-
+typedef uint_least32_t tRNGseed;
 
 class Board
 {
 public:
 	Board();
 	~Board();
-	void update();
 	void newBoard();
+	void generatePuzzle();
 	int getCellIndex(const tBoardCoord loc);
 	tBoardCell getCellData(tBoardCoord pLoc);
+	inline tRNGseed getSeed() { return rngSeed; }
 	bool setCellPencilMark(tBoardCellValue pValue, tBoardCoord pLoc);
 	bool setCellValue(tBoardCellValue pValue, tBoardCoord pLoc);
 
@@ -47,7 +44,7 @@ public:
 private:
 	tBoardData mBoard;
 	std::array<tBoardCellValue, BOARD_SIZE> valuePicker = {1,2,3,4,5,6,7,8,9};
-	uint_least32_t rngSeed;
+	tRNGseed rngSeed;
 	bool isRNGinitialized = false;
 	std::uniform_int_distribution<tBoardCellValue> rngDistrib;
 	std::mt19937 randGen;

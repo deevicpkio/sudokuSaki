@@ -7,5 +7,6 @@ const int SCREEN_HEIGHT = 1200;
 
 // NOTE: Handy macros
 #define SHOW_VAR(value) spdlog::debug("{}: {}", #value, value);
+#define SHOW_VAR_INFO(value) spdlog::info("{}: {}", #value, value);
 
 #endif

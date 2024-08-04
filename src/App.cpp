@@ -1,6 +1,7 @@
 #include "App.hpp"
 #include <spdlog/spdlog.h>
 #include <raylib.h>
+#include "Board.hpp"
 #include "config.h"
 
 App::App() {
@@ -68,10 +69,32 @@ void App::handleInput() {
         case KEY_SPACE:
             break;
     }
+    
+    if (IsKeyReleased(KEY_ZERO))
+            mScene->setSelectedValue(0);
+    if (IsKeyReleased(KEY_ONE))
+            mScene->setSelectedValue(1);
+    if (IsKeyReleased(KEY_TWO))
+            mScene->setSelectedValue(2);
+    if (IsKeyReleased(KEY_THREE))
+            mScene->setSelectedValue(3);
+    if (IsKeyReleased(KEY_FOUR))
+            mScene->setSelectedValue(4);
+    if (IsKeyReleased(KEY_FIVE))
+            mScene->setSelectedValue(5);
+    if (IsKeyReleased(KEY_SIX))
+            mScene->setSelectedValue(6);
+    if (IsKeyReleased(KEY_SEVEN))
+            mScene->setSelectedValue(7);
+    if (IsKeyReleased(KEY_EIGHT))
+            mScene->setSelectedValue(8);
+    if (IsKeyReleased(KEY_NINE))
+            mScene->setSelectedValue(9);
 }
 
-void App::update() {
-
+void App::update() 
+{
+    mScene->update();
 }
 
 void App::draw()
