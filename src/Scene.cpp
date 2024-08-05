@@ -27,6 +27,7 @@ void Scene::init(Board* pBoardRef)
             index = mBoard->getCellIndex({i,j});
             cell = mBoard->getCellData({i,j});
             
+            mBoardUI.at(index).index = index;
             mBoardUI.at(index).loc = cell.cellBoardPos;
             mBoardUI.at(index).isFixed = cell.isFixed;
             mBoardUI.at(index).isMarked = false; 
@@ -40,48 +41,10 @@ void Scene::init(Board* pBoardRef)
 
             mBoardUI.at(index).valuePos.x = (mTheme.cellWidth * j) + mTheme.cellMarginH + mTheme.textAlignHCenter;
             mBoardUI.at(index).valuePos.y = (mTheme.cellHeight * i) + mTheme.cellMarginV + mTheme.textAlignVCenter;
+            
+            mBoardUI.at(index).pencilMarkPos.x = (mTheme.cellWidth * j) + mTheme.cellMarginH + (baseFont.recs->width / 3.0f) ;
+            mBoardUI.at(index).pencilMarkPos.y = (mTheme.cellHeight * i) + mTheme.cellMarginV + mTheme.textAlignVCenter;
         }
-    }
-}
-
-void Scene::update()
-{
-    Vector2 newMousePos = GetMousePosition();
-    if (mousePos.x != newMousePos.x || mousePos.y != newMousePos.y)
-    {
-        mousePos = newMousePos;
-        for (auto& cellUI : mBoardUI)
-        {
-            if (CheckCollisionPointRec(mousePos, cellUI.cellRect))
-            {
-                cellUI.isSelected = true;
-            } else
-            {
-                cellUI.isSelected = false;
-            }
-        }
-    }
-}
-
-void Scene::draw()
-{
-
-    drawBoard();
-
-    drawUI();
-
-    drawCells();
-
-    drawBoxHighlight();
-
-}
-
-void Scene::setSelectedValue(const tBoardCellValue pValue)
-{
-    if (pValue >= 0 && pValue <= 9 && selectedValue != pValue) 
-    {
-        selectedValue = pValue;
-        SHOW_VAR(selectedValue)
     }
 }
 
@@ -119,16 +82,129 @@ void Scene::layoutSetup()
     
     mTheme.textColor = {0, 0, 0, 255}; // Black 
     mTheme.userInputColor = {10, 10, 255, 255}; // Blue
-    mTheme.fontSize = 48;
-    baseFont = LoadFontEx("assets/fonts/MesloLGS NF Regular.ttf", mTheme.fontSize, NULL, NULL);
+    mTheme.pencilMarkColor = {61, 61, 255, 255}; // Blue
+    baseFont = LoadFontEx("assets/fonts/MesloLGS NF Regular.ttf", 48, NULL, NULL);
+    mTheme.fontSize = baseFont.baseSize;
+    mTheme.userInputFontSize = mTheme.fontSize * 1.0f;
+    mTheme.pencilMarkFontSize = mTheme.fontSize * .5f;
+    mTheme.menuButtonFontSize = mTheme.fontSize * .5f;
     mTheme.textAlignHCenter = (mTheme.cellWidth / 2.0f) - (baseFont.recs->width / 2.0f); 
     mTheme.textAlignVCenter = (mTheme.cellHeight / 2.0f) - (baseFont.recs->height / 2.0f); 
     
     mTheme.selValuePos.x = mTheme.selValueRect.x + mTheme.textAlignHCenter;
     mTheme.selValuePos.y = mTheme.selValueRect.y + mTheme.textAlignVCenter;
-    mTheme.selValueLabelPos.x = mTheme.selValueRect.x;
+    mTheme.selValueLabelPos.x = mTheme.selValueRect.x + (baseFont.recs->width * .5f);
     mTheme.selValueLabelPos.y = mTheme.selValueRect.y + mTheme.selValueRect.height + 5.0f;
 }
+
+void Scene::update()
+{
+    handleScreenUI();
+}
+
+void Scene::handleScreenUI()
+{
+    int index = getMouseBoardPosition();
+    if (index < 0) return;
+    for (auto& cell : mBoardUI)
+    {
+        if (cell.index == index && !cell.isFixed)
+        {
+            cell.isSelected = true;
+        } else
+        {
+            cell.isSelected = false;
+        }
+    }
+}
+
+int Scene::getMouseBoardPosition()
+{
+    Vector2 newMousePos = GetMousePosition();
+    if (mousePos.x != newMousePos.x || mousePos.y != newMousePos.y)
+    {
+        mousePos = newMousePos;
+        for (auto& cellUI : mBoardUI)
+        {
+            if (CheckCollisionPointRec(mousePos, cellUI.cellRect))
+            {
+                mouseBoardPos = cellUI.index;
+                return cellUI.index;
+            }
+        }
+    } else
+    {
+        return mouseBoardPos;
+    }
+    mouseBoardPos = -1;
+    return -1;
+}
+
+void Scene::handleMouseAction()
+{
+    int index = getMouseBoardPosition();
+    if (index < 0) return;
+    if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+    {
+        if (mBoard->isEmpty(index))
+        {
+            // NOTE: handle pencil marks
+            setPencilMark(index, selectedValue);
+        } else
+        {
+            // NOTE: empty cell
+            mBoard->setCellValue(0, mBoardUI.at(index).loc);
+        }
+        
+    } else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        // NOTE: handle user value
+        mBoard->setCellValue(selectedValue, mBoardUI.at(index).loc);
+    }
+}
+
+void Scene::setPencilMark(int index, tBoardCellValue pValue)
+{
+    if (pValue == 0)
+    {
+        for (auto& mark : mBoardUI.at(index).pencilMarks)
+        {
+            mark = 0;
+        }
+    } else
+    {
+        if (mBoardUI.at(index).pencilMarks.at(pValue-1) == pValue)
+        {
+            mBoardUI.at(index).pencilMarks.at(pValue-1) = 0;
+        } else
+        {
+            mBoardUI.at(index).pencilMarks.at(pValue-1) = selectedValue;
+        }
+    }
+}
+
+void Scene::draw()
+{
+
+    drawBoard();
+
+    drawUI();
+
+    drawCells();
+
+    drawBoxHighlight();
+
+}
+
+void Scene::setSelectedValue(const tBoardCellValue pValue)
+{
+    if (pValue >= 0 && pValue <= 9 && selectedValue != pValue) 
+    {
+        selectedValue = pValue;
+        SHOW_VAR(selectedValue)
+    }
+}
+
 
 void Scene::drawBoard()
 {
@@ -144,7 +220,7 @@ void Scene::drawUI()
     {
         DrawTextEx(baseFont, std::to_string(selectedValue).c_str(), mTheme.selValuePos, baseFont.baseSize, 0.0f, mTheme.userInputColor);
     }
-    DrawTextEx(baseFont, "Selected Value", mTheme.selValueLabelPos, baseFont.baseSize*.5f, 0.0f, mTheme.textColor);
+    DrawTextEx(baseFont, "Selected", mTheme.selValueLabelPos, mTheme.menuButtonFontSize, 0.0f, mTheme.textColor);
 }
 
 void Scene::drawCells()
@@ -152,6 +228,7 @@ void Scene::drawCells()
     tScreenCell cellUI;
     tBoardCell cell;
     int index;
+    float cellBorderThickness, fontSize;
     Color textColor, cellBackgroundColor, cellBorderColor;
 
     for (tCoordItem i=0;i<BOARD_SIZE;i++)
@@ -179,27 +256,45 @@ void Scene::drawCells()
             if (cellUI.isSelected)
             {
                 cellBorderColor = mTheme.cellBorderColorSelected;
+                cellBorderThickness = mTheme.cellBorderThickness * 2.0f;
             } else
             {
                 cellBorderColor = mTheme.cellBorderColor;
+                cellBorderThickness = mTheme.cellBorderThickness;
             }
-            DrawRectangleLinesEx(cellUI.cellRect, mTheme.cellBorderThickness, cellBorderColor);
+            DrawRectangleLinesEx(cellUI.cellRect, cellBorderThickness, cellBorderColor);
+            
             // NOTE: 
-            // Draw number
+            // Draw cell values
             if (cell.value != 0) 
             {
+                // NOTE:
+                // Draw fixed/user value
                 if (cell.isFixed)
                 {
                     textColor = mTheme.textColor;
+                    fontSize = mTheme.fontSize;
                 } else
                 {
                     textColor = mTheme.userInputColor;
+                    fontSize = mTheme.userInputFontSize;
                 }
-                DrawTextEx(baseFont, std::to_string(cell.value).c_str(), cellUI.valuePos, baseFont.baseSize, 0.0f, textColor);
+                DrawTextEx(baseFont, std::to_string(cell.value).c_str(), cellUI.valuePos, fontSize, 0.0f, textColor);
+            } else
+            {
+                // NOTE:
+                // Draw pencil marks
+                std::string pencilMarks = ""; 
+                for (const auto& mark : cellUI.pencilMarks)
+                {
+                    if (mark > 0)
+                    {
+                        pencilMarks += std::to_string(mark);
+                    }
+                    
+                }
+                DrawTextEx(baseFont, pencilMarks.c_str(), cellUI.pencilMarkPos, mTheme.pencilMarkFontSize, 0.0f, mTheme.pencilMarkColor);
             }
-
-            // NOTE:
-            // Draw pencil marks
         }
     }
 }

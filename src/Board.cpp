@@ -152,6 +152,11 @@ int Board::getCellIndex(const tBoardCoord loc)
     return index;
 }
 
+bool Board::isEmpty(const int index)
+{
+    spdlog::debug("ENTERED isEmpty({})", index);
+    return mBoard.at(index).value == 0;
+}
 
 bool Board::isEmpty(const tBoardCoord cell)
 {

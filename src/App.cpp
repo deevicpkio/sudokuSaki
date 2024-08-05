@@ -54,6 +54,7 @@ void App::mainLoop()
 }
 
 void App::handleInput() {
+    // NOTE: handle keyboard input
     int keyPressed = GetKeyPressed();
 
     switch(keyPressed)
@@ -90,6 +91,12 @@ void App::handleInput() {
             mScene->setSelectedValue(8);
     if (IsKeyReleased(KEY_NINE))
             mScene->setSelectedValue(9);
+
+    // NOTE: handle mouse input
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+    {
+        mScene->handleMouseAction();
+    }
 }
 
 void App::update() 

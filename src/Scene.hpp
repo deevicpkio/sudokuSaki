@@ -37,10 +37,11 @@ typedef struct
 
     Color textColor; // base text color
     Color userInputColor; // user input text color
+    Color pencilMarkColor;
     int fontSize; // base font size
-    float pencilMarkFontSize; // (0.1 .. n) proportional to base size (ie.: .90 means 90% of fontSize)
-    float userInputFontSize;
-    float menuButtonFontSize;
+    int pencilMarkFontSize; // (0.1 .. n) proportional to base size (ie.: .90 means 90% of fontSize)
+    int userInputFontSize;
+    int menuButtonFontSize;
 
     float textAlignHCenter; 
     float textAlignVCenter; 
@@ -48,14 +49,15 @@ typedef struct
 
 typedef struct
 {
+    int index;
     tBoardCoord loc;
-    std::array<tBoardCellValue, BOARD_SIZE-1> pencilMarks;
+    std::array<tBoardCellValue, BOARD_SIZE> pencilMarks;
     bool isFixed;
     bool isSelected;
     bool isMarked;
     Rectangle cellRect;
     Vector2 valuePos;
-    Rectangle pencilMarksRect;
+    Vector2 pencilMarkPos;
 } tScreenCell;
 typedef std::array<tScreenCell, TOTAL_CELLS> tScreenBoard;
 
@@ -68,6 +70,7 @@ public:
     void draw();
     void update();
     void setSelectedValue(const tBoardCellValue pValue);
+    void handleMouseAction();
     inline tBoardCellValue getSelectedValue() { return selectedValue; }
 
 private:
@@ -78,13 +81,17 @@ private:
     tSceneTheme mTheme;
     tScreenBoard mBoardUI;
     tBoardCellValue selectedValue;
-	Vector2 mousePos;
+    Vector2 mousePos;
+    int mouseBoardPos;
 
     void layoutSetup();
     void drawBoard();
     void drawUI();
     void drawCells();
     void drawBoxHighlight();
+    void handleScreenUI();
+    int getMouseBoardPosition();
+    void setPencilMark(int index, tBoardCellValue pValue);
 };
 
 #endif

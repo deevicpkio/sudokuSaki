@@ -37,6 +37,8 @@ public:
 	inline tRNGseed getSeed() { return rngSeed; }
 	bool setCellPencilMark(tBoardCellValue pValue, tBoardCoord pLoc);
 	bool setCellValue(tBoardCellValue pValue, tBoardCoord pLoc);
+	bool isEmpty(const tBoardCoord cell);
+	bool isEmpty(const int index);
 
 	void testPrintBoard();
 	void testValuePicker();
@@ -51,7 +53,6 @@ private:
 
 	void cleanBoard();
 	bool generateBoard(tBoardCoord pLoc);
-	bool isEmpty(const tBoardCoord cell);
 	bool isValidInput(const tBoardCellValue value, const tBoardCoord loc);
 	void initializeRNG();
 	tBoardCellValue getRandomValue();
