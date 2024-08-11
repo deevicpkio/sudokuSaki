@@ -39,6 +39,7 @@ public:
 	bool setCellValue(tBoardCellValue pValue, tBoardCoord pLoc);
 	bool isEmpty(const tBoardCoord cell);
 	bool isEmpty(const int index);
+	bool solvePuzzle();
 
 	void testPrintBoard();
 	void testValuePicker();
@@ -50,6 +51,7 @@ private:
 	bool isRNGinitialized = false;
 	std::uniform_int_distribution<tBoardCellValue> rngDistrib;
 	std::mt19937 randGen;
+	bool isGeneratedPuzzle = false;
 
 	void cleanBoard();
 	bool generateBoard(tBoardCoord pLoc);

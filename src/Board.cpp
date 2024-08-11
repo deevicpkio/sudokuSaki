@@ -52,12 +52,32 @@ void Board::newBoard()
         std::cout << "Error generating the puzzle. Wrong seed?";
         return;
     }
-    
+
+    isGeneratedPuzzle = true; 
     generatePuzzle();
 
     SHOW_VAR_INFO(rngSeed);
 
     //testPrintBoard();
+}
+
+bool Board::solvePuzzle()
+{
+    if (isGeneratedPuzzle)
+    {
+        for (auto& cell : mBoard)
+        {
+            if (!cell.isFixed)
+            {
+                cell.value = cell.solutionValue;
+            }
+        }
+        return true;
+    } else
+    {
+        // TODO: build logic to solve given puzzle (user created)
+    }
+    return true;
 }
 
 void Board::getBoardData(tBoardData* boardData)

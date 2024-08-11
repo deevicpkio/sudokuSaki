@@ -44,7 +44,9 @@ typedef struct
     int menuButtonFontSize;
 
     float textAlignHCenter; 
-    float textAlignVCenter; 
+    float textAlignVCenter;
+
+	std::vector<Rectangle> buttonRecs;
 } tSceneTheme;
 
 typedef struct
@@ -92,6 +94,7 @@ private:
     void handleScreenUI();
     int getMouseBoardPosition();
     void setPencilMark(int index, tBoardCellValue pValue);
+	void showSolution();
 };
 
 #endif

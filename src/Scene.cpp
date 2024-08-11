@@ -1,7 +1,8 @@
 #include "Scene.hpp"
+#define RAYGUI_IMPLEMENTATION
+#include <raygui.h>
 #include "Board.hpp"
 #include "config.h"
-#include <raylib.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -95,6 +96,14 @@ void Scene::layoutSetup()
     mTheme.selValuePos.y = mTheme.selValueRect.y + mTheme.textAlignVCenter;
     mTheme.selValueLabelPos.x = mTheme.selValueRect.x + (baseFont.recs->width * .5f);
     mTheme.selValueLabelPos.y = mTheme.selValueRect.y + mTheme.selValueRect.height + 5.0f;
+
+    // NOTE: button order is relevant
+    Rectangle buttonRect;
+    buttonRect.x = mTheme.selValueRect.x + mTheme.selValueRect.width + 40.0f;
+    buttonRect.y = mTheme.boardMarginH;
+    buttonRect.width = 70.0f;
+    buttonRect.height = 20.0f;
+    mTheme.buttonRecs.push_back({});
 }
 
 void Scene::update()
@@ -221,6 +230,15 @@ void Scene::drawUI()
         DrawTextEx(baseFont, std::to_string(selectedValue).c_str(), mTheme.selValuePos, baseFont.baseSize, 0.0f, mTheme.userInputColor);
     }
     DrawTextEx(baseFont, "Selected", mTheme.selValueLabelPos, mTheme.menuButtonFontSize, 0.0f, mTheme.textColor);
+
+    for (const auto& button : mTheme.buttonRecs)
+    {
+        if (GuiButton(button, GuiIconText(ICON_EXIT, "Solve")))
+        {
+            showSolution();
+        }
+    }
+
 }
 
 void Scene::drawCells()
@@ -316,3 +334,7 @@ void Scene::drawBoxHighlight()
     }
 }
 
+void Scene::showSolution()
+{
+    mBoard->solvePuzzle();
+}
